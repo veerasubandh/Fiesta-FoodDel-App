@@ -40,12 +40,13 @@ const StoreContextProvider = (props) => {
   };
 
   const getTotalCartAmount = () => {
-    return Object.entries(cartItems).reduce((total, [itemId, quantity]) => {
+    return Object.entries(cartItems || {}).reduce((total, [itemId, quantity]) => {
       const itemInfo = foodList.find((product) => product._id === itemId);
       return itemInfo ? total + itemInfo.price * quantity : total;
     }, 0);
   };
-
+  
+  
   const fetchFoodList = async () => {
     try {
       const response = await axios.get(url + "/api/food/list");
@@ -58,11 +59,13 @@ const StoreContextProvider = (props) => {
   const loadCartData = async (token) => {
     try {
       const response = await axios.post(url + "/api/cart/get", {}, { headers: { token } });
-      setCartItems(response.data.cartData);
+      setCartItems(response.data.cartData || {}); // 👈 Default to empty object
     } catch (error) {
       console.error("Error loading cart data:", error);
+      setCartItems({}); // 👈 Also fallback to an empty object on error
     }
   };
+  
 
   useEffect(() => {
     async function loadData() {
